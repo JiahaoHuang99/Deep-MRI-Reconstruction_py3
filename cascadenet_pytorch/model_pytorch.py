@@ -59,7 +59,7 @@ class DnCn(nn.Module):
         super(DnCn, self).__init__()
         self.nc = nc
         self.nd = nd
-        print('Creating D{}C{}'.format(nd, nc))
+        print(('Creating D{}C{}'.format(nd, nc)))
         conv_blocks = []
         dcs = []
 
@@ -89,7 +89,7 @@ class StochasticDnCn(DnCn):
         self.p = p
         if not p:
             self.p = np.linspace(0, 0.5, nc)
-        print(self.p)
+        print((self.p))
 
     def forward(self, x, k, m):
         for i in range(self.nc):
@@ -114,7 +114,7 @@ class DnCn3D(nn.Module):
         super(DnCn3D, self).__init__()
         self.nc = nc
         self.nd = nd
-        print('Creating D{}C{} (3D)'.format(nd, nc))
+        print(('Creating D{}C{} (3D)'.format(nd, nc)))
         conv_blocks = []
         dcs = []
 
@@ -150,7 +150,7 @@ class DnCn3DDS(nn.Module):
         self.nc = nc
         self.nd = nd
         self.mode = mode
-        print('Creating D{}C{}-DS (3D)'.format(nd, nc))
+        print(('Creating D{}C{}-DS (3D)'.format(nd, nc)))
         if self.mode == 'theano':
             print('Initialised with theano mode (backward-compatibility)')
         conv_blocks = []
@@ -201,7 +201,7 @@ class DnCn3DShared(nn.Module):
         super(DnCn3DShared, self).__init__()
         self.nc = nc
         self.nd = nd
-        print('Creating D{}C{}-S (3D)'.format(nd, nc))
+        print(('Creating D{}C{}-S (3D)'.format(nd, nc)))
 
         self.conv_block = conv_block(n_channels, nd, **kwargs)
         self.dc = cl.DataConsistencyInKspace(norm='ortho')

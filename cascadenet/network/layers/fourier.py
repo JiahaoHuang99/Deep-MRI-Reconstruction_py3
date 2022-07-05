@@ -18,11 +18,11 @@ if theano.config.device == 'cuda' and cufft_available:
     from cascadenet.network.theano_extensions.gpuarray.fft2 import cufft2 as fft2g
     from cascadenet.network.theano_extensions.gpuarray.fft2 import cuifft2 as ifft2g
     use_cuda = True
-    print "Using GPU version of fft layers"
+    print("Using GPU version of fft layers")
 else:
     from cascadenet.network.theano_extensions.fft2_lasagne import fft2, ifft2
     use_cuda = False
-    print "Using CPU version of fft layers"
+    print("Using CPU version of fft layers")
 
 
 from cascadenet.network.theano_extensions.fft_helper import fftshift, ifftshift

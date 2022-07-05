@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import print_function, division
+
 
 import os
 import time
@@ -19,7 +19,7 @@ from utils.metric import complex_psnr
 from cascadenet.network.model import build_d2_c2, build_d5_c5
 from cascadenet.util.helpers import from_lasagne_format
 from cascadenet.util.helpers import to_lasagne_format
-
+import cv2
 
 def prep_input(im, acc=4):
     """Undersample the batch, then reformat them into what the network accepts.
@@ -45,7 +45,7 @@ def iterate_minibatch(data, batch_size, shuffle=True):
     if shuffle:
         data = np.random.permutation(data)
 
-    for i in xrange(0, n, batch_size):
+    for i in range(0, n, batch_size):
         yield data[i:i+batch_size]
 
 
@@ -171,14 +171,15 @@ if __name__ == '__main__':
     train, validate, test = create_dummy_data()
 
     print('Start Training...')
-    for epoch in xrange(num_epoch):
+    for epoch in range(num_epoch):
         t_start = time.time()
         # Training
         train_err = 0
         train_batches = 0
         for im in iterate_minibatch(train, batch_size, shuffle=True):
             im_und, k_und, mask, im_gnd = prep_input(im, acc=acc)
-            err = train_fn(im_und, mask, k_und, im_gnd)[0]
+            err = train_fn(im_und, mask, k_und, im_gnd)[0]  # (BS, 2, 128, 128) # mask (BS, 2, 128, 128)
+
             train_err += err
             train_batches += 1
 

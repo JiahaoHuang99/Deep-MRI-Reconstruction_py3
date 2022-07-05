@@ -1,7 +1,8 @@
 import numpy as np
 from . import mymath
 from numpy.lib.stride_tricks import as_strided
-
+from scipy.io import *
+from scipy.fft import *
 
 def soft_thresh(u, lmda):
     """Soft-threshing operator for complex valued input"""
@@ -104,7 +105,7 @@ def shear_grid_mask(shape, acceleration_rate, sample_low_freq=True,
     Nt, Nx, Ny = shape
     start = np.random.randint(0, acceleration_rate)
     mask = np.zeros((Nt, Nx))
-    for t in xrange(Nt):
+    for t in range(Nt):
         mask[t, (start+t)%acceleration_rate::acceleration_rate] = 1
 
     xc = Nx / 2
@@ -135,15 +136,15 @@ def perturbed_shear_grid_mask(shape, acceleration_rate, sample_low_freq=True,
     Nt, Nx, Ny = shape
     start = np.random.randint(0, acceleration_rate)
     mask = np.zeros((Nt, Nx))
-    for t in xrange(Nt):
+    for t in range(Nt):
         mask[t, (start+t)%acceleration_rate::acceleration_rate] = 1
 
     # brute force
     rand_code = np.random.randint(0, 3, size=Nt*Nx)
     shift = np.array([-1, 0, 1])[rand_code]
     new_mask = np.zeros_like(mask)
-    for t in xrange(Nt):
-        for x in xrange(Nx):
+    for t in range(Nt):
+        for x in range(Nx):
             if mask[t, x]:
                 new_mask[t, (x + shift[t*x])%Nx] = 1
 
@@ -215,6 +216,16 @@ def undersample(x, mask, centred=False, norm='ortho', noise=0):
         x_fu = mask * (x_f + nz)
         x_u = mymath.ifft2(x_fu, norm=norm)
         return x_u, x_fu
+
+
+def undersample_kspace(x, mask):
+
+    fft = fft2(x, norm="ortho")
+    fft = fft * mask
+    im_und = ifft2(fft, norm="ortho")
+    k_und = fft.copy()
+
+    return im_und, k_und
 
 
 def data_consistency(x, y, mask, centered=False, norm='ortho'):

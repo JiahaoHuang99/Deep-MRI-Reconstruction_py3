@@ -19,7 +19,7 @@ class KspaceFillNeighbourLayer(MergeLayer):
     The input data is assumed to be in k-space grid.
     This layer should be invoked from AverageInKspaceLayer
     '''
-    def __init__(self, incomings, frame_dist=range(5), divide_by_n=False,
+    def __init__(self, incomings, frame_dist=list(range(5)), divide_by_n=False,
                  **kwargs):
         super(KspaceFillNeighbourLayer, self).__init__(incomings, **kwargs)
         self.frame_dist = frame_dist
@@ -86,7 +86,7 @@ class KspaceFillNeighbourLayer_Clipped(MergeLayer):
     This layer should be invoked from AverageInKspaceLayer
     '''
 
-    def __init__(self, incomings, nt, frame_dist=range(5), divide_by_n=False,
+    def __init__(self, incomings, nt, frame_dist=list(range(5)), divide_by_n=False,
                  **kwargs):
         super(KspaceFillNeighbourLayer_Clipped, self).__init__(incomings, **kwargs)
         self.frame_dist = frame_dist

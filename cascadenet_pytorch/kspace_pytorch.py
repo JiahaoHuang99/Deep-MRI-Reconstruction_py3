@@ -107,7 +107,7 @@ class KspaceFillNeighbourLayer(nn.Module):
         # frame_dist is the extent that data sharing goes.
         # e.g. current frame is 3, frame_dist = 2, then 1,2, and 4,5 are added for reconstructing 3
         super(KspaceFillNeighbourLayer, self).__init__()
-        print("fr_d={}, divide_by_n={}, clippd={}".format(frame_dist, divide_by_n, clipped))
+        print(("fr_d={}, divide_by_n={}, clippd={}".format(frame_dist, divide_by_n, clipped)))
         if 0 not in frame_dist:
             raise ValueError("There suppose to be a 0 in fr_d in config file!")
             frame_dist = [0] + frame_dist # include ID

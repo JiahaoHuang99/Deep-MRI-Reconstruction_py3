@@ -7,3 +7,5 @@ models
 *.base
 deep_mri
 *.#*
+
+.idea
