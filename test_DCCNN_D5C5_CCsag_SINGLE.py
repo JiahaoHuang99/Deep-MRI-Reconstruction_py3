@@ -142,14 +142,13 @@ if __name__ == '__main__':
 
     print(theano.config.device)
     # Project config
-    undersampling_mask = 'G1D10'
-    model_name = 'DCCNN_D5C5_CC_{}'.format(undersampling_mask)
-    
+    mask_name = 'G1D10'
+    model_name = 'DCCNN_D5C5_CC_{}'.format(mask_name)
+
     # Testing image
     path = 'sample/GT_1024.png'
     filename = get_file_name(path)
 
-    mask_name = str(args.undersampling_mask[0])  # undersampling rate
     num_epoch = int(args.num_epoch[0])
     batch_size = int(args.batch_size[0])
     Nx, Ny = 256, 256
@@ -202,14 +201,23 @@ if __name__ == '__main__':
             recon = abs(from_lasagne_format(pred))[0]
             zf = abs(from_lasagne_format(im_und))[0]
 
-            mkdir(os.path.join(save_dir, 'single_test', 'npy'))
+            diff_gen_x10 = (abs(gt - recon) * 10 * 256).round().astype(np.uint8)
+            diff_lq_x10 = (abs(zf - recon) * 10 * 256).round().astype(np.uint8)
+
+            # mkdir(os.path.join(save_dir, 'single_test', 'npy'))
             mkdir(os.path.join(save_dir, 'single_test', 'png'))
-            np.save(os.path.join(save_dir, 'single_test', 'npy', 'GT_{}.npy'.format(filename[3:])), gt)
+            # np.save(os.path.join(save_dir, 'single_test', 'npy', 'GT_{}.npy'.format(filename[3:])), gt)
             cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'GT_{}.png'.format(filename[3:])), gt*255)
-            np.save(os.path.join(save_dir, 'single_test', 'npy', 'Recon_{}.npy'.format(filename[3:])), recon)
+            # np.save(os.path.join(save_dir, 'single_test', 'npy', 'Recon_{}.npy'.format(filename[3:])), recon)
             cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'Recon_{}.png'.format(filename[3:])), recon*255)
-            np.save(os.path.join(save_dir, 'single_test', 'npy', 'ZF_{}.npy'.format(filename[3:])), zf)
+            # np.save(os.path.join(save_dir, 'single_test', 'npy', 'ZF_{}.npy'.format(filename[3:])), zf)
             cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'ZF_{}.png'.format(filename[3:])), zf*255)
+
+            diff_gen_x10_color = cv2.applyColorMap(diff_gen_x10, cv2.COLORMAP_JET)
+            diff_lq_x10_color = cv2.applyColorMap(diff_lq_x10, cv2.COLORMAP_JET)
+            cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'Diff_Recon_{}.png'.format(filename[3:])), diff_gen_x10_color)
+            cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'Diff_ZF_{}.png'.format(filename[3:])), diff_lq_x10_color)
+
         i = i + 1
         t_end = time.time()
         print('Testing Idx: {}; Time Cost: {:.3f}'.format(i, (t_end-t_start)))

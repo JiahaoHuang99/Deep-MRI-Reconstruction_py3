@@ -135,10 +135,9 @@ if __name__ == '__main__':
 
     print(theano.config.device)
     # Project config
-    undersampling_mask = 'G1D10'
-    model_name = 'DCCNN_D5C5_CC_{}'.format(undersampling_mask)
+    mask_name = 'R10'
+    model_name = 'DCCNN_D5C5_CC_{}'.format(mask_name)
 
-    mask_name = str(args.undersampling_mask[0])  # undersampling rate
     num_epoch = int(args.num_epoch[0])
     batch_size = int(args.batch_size[0])
     Nx, Ny = 256, 256
