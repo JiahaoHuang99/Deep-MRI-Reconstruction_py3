@@ -125,9 +125,9 @@ if __name__ == '__main__':
     # parser.add_argument('--acceleration_factor', metavar='float', nargs=1,
     #                     default=['4.0'],
     #                     help='Acceleration factor for k-space sampling')
-    parser.add_argument('--undersampling_mask', metavar='str', nargs=1,
-                        default=['G1D30'],
-                        help='Undersampling mask for k-space sampling')
+    # parser.add_argument('--undersampling_mask', metavar='str', nargs=1,
+    #                     default=['G2D30'],
+    #                     help='Undersampling mask for k-space sampling')
     parser.add_argument('--debug', action='store_true', help='debug mode')
     parser.add_argument('--savefig', action='store_true', help='Save output images and masks')
 
@@ -135,7 +135,9 @@ if __name__ == '__main__':
 
     print(theano.config.device)
     # Project config
-    model_name = 'DCCNN_D5C5_CC_G1D30'
+    undersampling_mask = 'G1D10'
+    model_name = 'DCCNN_D5C5_CC_{}'.format(undersampling_mask)
+
     mask_name = str(args.undersampling_mask[0])  # undersampling rate
     num_epoch = int(args.num_epoch[0])
     batch_size = int(args.batch_size[0])

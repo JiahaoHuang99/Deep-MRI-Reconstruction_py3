@@ -58,13 +58,13 @@ def iterate_minibatch(data, batch_size, shuffle=True):
         yield data[i:i+batch_size]
 
 
-def create_dummy_data():
+def create_dummy_data(path):
 
+    img = cv2.imread(path, 0)/255
+    img = (img - img.min())/(img.max() - img.min())
+    img = img[np.newaxis, :, :]
 
-    train_data_array = load_images('/media/ssd/data_temp/CC/db_train', 47, 100)
-    val_data_array = load_images('/media/ssd/data_temp/CC/db_train', 20, 100)
-
-    return train_data_array, val_data_array, val_data_array
+    return img
 
 
 def compile_fn(network, net_config, args):
@@ -112,6 +112,13 @@ def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
+def get_file_name(path):
+    _, filenameext = os.path.split(path)
+    filename, _ = os.path.splitext(filenameext)
+
+    return filename
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_epoch', metavar='int', nargs=1, default=['10'],
@@ -125,9 +132,9 @@ if __name__ == '__main__':
     # parser.add_argument('--acceleration_factor', metavar='float', nargs=1,
     #                     default=['4.0'],
     #                     help='Acceleration factor for k-space sampling')
-    parser.add_argument('--undersampling_mask', metavar='str', nargs=1,
-                        default=['G1D10'],
-                        help='Undersampling mask for k-space sampling')
+    # parser.add_argument('--undersampling_mask', metavar='str', nargs=1,
+    #                     default=['G2D30'],
+    #                     help='Undersampling mask for k-space sampling')
     parser.add_argument('--debug', action='store_true', help='debug mode')
     parser.add_argument('--savefig', action='store_true', help='Save output images and masks')
 
@@ -135,7 +142,13 @@ if __name__ == '__main__':
 
     print(theano.config.device)
     # Project config
-    model_name = 'DCCNN_D5C5_CC_G1D10'
+    undersampling_mask = 'G1D10'
+    model_name = 'DCCNN_D5C5_CC_{}'.format(undersampling_mask)
+    
+    # Testing image
+    path = 'sample/GT_1024.png'
+    filename = get_file_name(path)
+
     mask_name = str(args.undersampling_mask[0])  # undersampling rate
     num_epoch = int(args.num_epoch[0])
     batch_size = int(args.batch_size[0])
@@ -160,7 +173,7 @@ if __name__ == '__main__':
     train_fn, val_fn = compile_fn(net, net_config, args)
 
     # Create dataset
-    train, validate, test = create_dummy_data()
+    test = create_dummy_data(path)
 
     print('Start Training...')
 
@@ -189,18 +202,14 @@ if __name__ == '__main__':
             recon = abs(from_lasagne_format(pred))[0]
             zf = abs(from_lasagne_format(im_und))[0]
 
-            mkdir(os.path.join(save_dir, 'test_epoch_9', 'npy', 'GT'))
-            mkdir(os.path.join(save_dir, 'test_epoch_9', 'png', 'GT'))
-            np.save(os.path.join(save_dir, 'test_epoch_9', 'npy', 'GT', 'GT_{:04d}.npy'.format(i)), gt)
-            cv2.imwrite(os.path.join(save_dir, 'test_epoch_9', 'png', 'GT', 'GT_{:04d}.png'.format(i)), gt*255)
-            mkdir(os.path.join(save_dir, 'test_epoch_9', 'npy', 'Recon'))
-            mkdir(os.path.join(save_dir, 'test_epoch_9', 'png', 'Recon'))
-            np.save(os.path.join(save_dir, 'test_epoch_9', 'npy', 'Recon', 'Recon_{:04d}.npy'.format(i)), recon)
-            cv2.imwrite(os.path.join(save_dir, 'test_epoch_9', 'png', 'Recon', 'Recon_{:04d}.png'.format(i)), recon*255)
-            mkdir(os.path.join(save_dir, 'test_epoch_9', 'npy', 'ZF'))
-            mkdir(os.path.join(save_dir, 'test_epoch_9', 'png', 'ZF'))
-            np.save(os.path.join(save_dir, 'test_epoch_9', 'npy', 'ZF', 'ZF_{:04d}.npy'.format(i)), zf)
-            cv2.imwrite(os.path.join(save_dir, 'test_epoch_9', 'png', 'ZF', 'ZF_{:04d}.png'.format(i)), zf*255)
+            mkdir(os.path.join(save_dir, 'single_test', 'npy'))
+            mkdir(os.path.join(save_dir, 'single_test', 'png'))
+            np.save(os.path.join(save_dir, 'single_test', 'npy', 'GT_{}.npy'.format(filename[3:])), gt)
+            cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'GT_{}.png'.format(filename[3:])), gt*255)
+            np.save(os.path.join(save_dir, 'single_test', 'npy', 'Recon_{}.npy'.format(filename[3:])), recon)
+            cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'Recon_{}.png'.format(filename[3:])), recon*255)
+            np.save(os.path.join(save_dir, 'single_test', 'npy', 'ZF_{}.npy'.format(filename[3:])), zf)
+            cv2.imwrite(os.path.join(save_dir, 'single_test', 'png', 'ZF_{}.png'.format(filename[3:])), zf*255)
         i = i + 1
         t_end = time.time()
         print('Testing Idx: {}; Time Cost: {:.3f}'.format(i, (t_end-t_start)))
