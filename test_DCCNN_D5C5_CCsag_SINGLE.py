@@ -142,11 +142,11 @@ if __name__ == '__main__':
 
     print(theano.config.device)
     # Project config
-    mask_name = 'G1D10'
+    mask_name = 'R10'
     model_name = 'DCCNN_D5C5_CC_{}'.format(mask_name)
 
     # Testing image
-    path = 'sample/GT_1024.png'
+    path = 'sample/GT_01440.png'
     filename = get_file_name(path)
 
     num_epoch = int(args.num_epoch[0])
