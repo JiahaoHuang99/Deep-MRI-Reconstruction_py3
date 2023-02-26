@@ -7,5 +7,5 @@ models
 *.base
 deep_mri
 *.#*
-
+*.DS_Store
 .idea
