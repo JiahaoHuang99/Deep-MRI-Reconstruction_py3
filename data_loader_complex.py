@@ -27,14 +27,21 @@ def load_images(data_path, h, w):
     data_path_list = sorted(glob(os.path.join(data_path, '*.h5')))
 
     data_array = []
+    data_info = []
     for data_idx, data_path in enumerate(data_path_list):
-        img = read_h5(data_path)['image_complex']
+        data_dict = read_h5(data_path)
+        img = data_dict['image_complex']
         img = preprocess_normalisation(img)
+        data_name = data_dict['data_name']
+        slice_idx = data_dict['slice_idx']
+        slice_info = '{}_{:03d}'.format(data_name, slice_idx)
+
         data_array.append(img)
+        data_info.append(slice_info)
 
     data_array = np.array(data_array).reshape((len(data_path_list), h, w))
 
-    return data_array
+    return data_array, data_info
 
 
 
