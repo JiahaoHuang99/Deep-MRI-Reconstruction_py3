@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 
-def load_mask(bs, mask_name):
+def load_mask(mask_name):
 
     # 256 * 256 Gaussian 1D
     if mask_name == 'G1D10':
@@ -127,6 +127,20 @@ def load_mask(bs, mask_name):
         mask = 2
 
     # GRAPPA-like (with ACS) Regular Acceleration Factor x Central Fraction x PE (from fastMRI)
+    elif mask_name == 'fMRI_Reg_AF2_CF0.16_PE48':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af2_cf0.16_pe48.npy'))
+    elif mask_name == 'fMRI_Reg_AF2_CF0.16_PE96':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af2_cf0.16_pe96.npy'))
+    elif mask_name == 'fMRI_Reg_AF2_CF0.16_PE128':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af2_cf0.16_pe128.npy'))
+    elif mask_name == 'fMRI_Reg_AF2_CF0.16_PE256':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af2_cf0.16_pe256.npy'))
+    elif mask_name == 'fMRI_Reg_AF2_CF0.16_PE320':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af2_cf0.16_pe320.npy'))
+    elif mask_name == 'fMRI_Reg_AF2_CF0.16_PE512':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af2_cf0.16_pe512.npy'))
+    elif mask_name == 'fMRI_Reg_AF4_CF0.08_PE48':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af4_cf0.08_pe48.npy'))
     elif mask_name == 'fMRI_Reg_AF4_CF0.08_PE96':
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af4_cf0.08_pe96.npy'))
     elif mask_name == 'fMRI_Reg_AF4_CF0.08_PE128':
@@ -137,6 +151,8 @@ def load_mask(bs, mask_name):
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af4_cf0.08_pe320.npy'))
     elif mask_name == 'fMRI_Reg_AF4_CF0.08_PE512':
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af4_cf0.08_pe512.npy'))
+    elif mask_name == 'fMRI_Reg_AF8_CF0.04_PE48':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af8_cf0.04_pe48.npy'))
     elif mask_name == 'fMRI_Reg_AF8_CF0.04_PE96':
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af8_cf0.04_pe96.npy'))
     elif mask_name == 'fMRI_Reg_AF8_CF0.04_PE128':
@@ -147,6 +163,8 @@ def load_mask(bs, mask_name):
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af8_cf0.04_pe320.npy'))
     elif mask_name == 'fMRI_Reg_AF8_CF0.04_PE512':
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af8_cf0.04_pe512.npy'))
+    elif mask_name == 'fMRI_Reg_AF16_CF0.02_PE48':
+        mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af16_cf0.02_pe48.npy'))
     elif mask_name == 'fMRI_Reg_AF16_CF0.02_PE96':
         mask = np.load(os.path.join('mask', 'fastmri', 'regular', 'regular_af16_cf0.02_pe96.npy'))
     elif mask_name == 'fMRI_Reg_AF16_CF0.02_PE128':
@@ -179,6 +197,8 @@ def load_mask(bs, mask_name):
         mask = np.load(os.path.join('mask', 'fastmri', 'random', 'random_af8_cf0.04_pe320.npy'))
     elif mask_name == 'fMRI_Ran_AF8_CF0.04_PE512':
         mask = np.load(os.path.join('mask', 'fastmri', 'random', 'random_af8_cf0.04_pe512.npy'))
+    elif mask_name == 'fMRI_Ran_AF16_CF0.02_PE48':
+        mask = np.load(os.path.join('mask', 'fastmri', 'random', 'random_af16_cf0.02_pe48.npy'))
     elif mask_name == 'fMRI_Ran_AF16_CF0.02_PE96':
         mask = np.load(os.path.join('mask', 'fastmri', 'random', 'random_af16_cf0.02_pe96.npy'))
     elif mask_name == 'fMRI_Ran_AF16_CF0.02_PE128':
@@ -192,13 +212,7 @@ def load_mask(bs, mask_name):
     else:
         raise NotImplementedError('Mask [{:s}] is not defined.'.format(mask_name))
 
-    # get mask
-    if 'fMRI' in mask_name:
-        mask = np.repeat(mask[:, np.newaxis], mask.shape[0], axis=1).transpose((1, 0))
 
-    mask = scipy.fftpack.ifftshift(mask)
+    print('Training model [{:s}] is created.'.format(mask_name))
 
-    mask_bs = mask[np.newaxis, :, :]
-    mask_bs = np.repeat(mask_bs, bs, axis=0).astype(float)
-
-    return mask_bs
+    return mask

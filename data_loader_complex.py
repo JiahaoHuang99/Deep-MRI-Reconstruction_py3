@@ -23,9 +23,10 @@ def read_h5(data_path):
     return dict
 
 
-def load_images(data_path, h, w):
+def load_images(data_path, h, w, debug=False):
     data_path_list = sorted(glob(os.path.join(data_path, '*.h5')))
-
+    if debug:
+        data_path_list = data_path_list[0:100]
     data_array = []
     data_info = []
     for data_idx, data_path in enumerate(data_path_list):

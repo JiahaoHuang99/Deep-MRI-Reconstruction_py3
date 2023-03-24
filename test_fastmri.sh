@@ -19,7 +19,7 @@ rm ${log_name}
 
 CUDA_VISIBLE_DEVICES=$GPUID \
 PYTHONPATH=$(pwd) \
-nohup python train_DCCNN_D5C5_Complex.py \
+nohup python test_DCCNN_D5C5_Complex.py \
 --task_name ${task_name} \
 --data_path_train /media/ssd/data_temp/fastMRI/knee/d.1.0.complex/train/PD/h5_image_complex \
 --data_path_val /media/ssd/data_temp/fastMRI/knee/d.1.0.complex/val/PD/h5_image_complex \
