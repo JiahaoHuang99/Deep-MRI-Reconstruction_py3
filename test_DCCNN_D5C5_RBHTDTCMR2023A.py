@@ -160,12 +160,20 @@ if __name__ == '__main__':
     data_path = args.data_path
     disease = args.disease
     cphase = args.cphase
+
     model_name = 'DCCNN_D5C5_RBHTDTCMR2023A_{}_{}_{}'.format(undersampling_mask, disease, cphase)
+
+    if disease == 'MI':
+        model_name_for_weight = 'DCCNN_D5C5_RBHTDTCMR2023A_{}_{}_{}'.format(undersampling_mask, 'AllDisease', cphase)
+    else:
+        model_name_for_weight = model_name
 
     # Configure directory info
     project_root = '/home/jh/Deep-MRI-Reconstruction_py3'
     save_dir = join(project_root, 'results/%s' % model_name)
-    weight_path = os.path.join(args.weight_path, model_name)
+
+    weight_path = os.path.join(args.weight_path, model_name_for_weight)
+
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
 
@@ -174,7 +182,7 @@ if __name__ == '__main__':
     net_config, net,  = build_d5_c5(input_shape)
 
     # D5-C5 with pre-trained parameters
-    with np.load(os.path.join(weight_path, f'{model_name}_epoch_20.npz')) as f:
+    with np.load(os.path.join(weight_path, f'{model_name_for_weight}_epoch_20.npz')) as f:
         param_values = [f['arr_{0}'.format(i)] for i in range(len(f.files))]
         lasagne.layers.set_all_param_values(net, param_values)
 

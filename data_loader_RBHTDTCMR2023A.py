@@ -83,13 +83,18 @@ def load_images(dataroot, h, w, phase='train', disease='', cphase='', debug=Fals
     data_infos = []
     case_infos = []
 
+    if disease == 'MI':
+        log_name = 'log_mi'
+    else:
+        log_name = 'log'
+
     if phase == 'train':
         fold_index = [1, 2, 3, 4]
 
         # record slice
         for idx in fold_index:
             record_path = 'TrainVal-F{}_{}_{}_Slice.csv'.format(idx, disease, cphase)
-            with open(os.path.join(dataroot, 'log', record_path), 'r', encoding="UTF-8") as csvfile:
+            with open(os.path.join(dataroot, log_name, record_path), 'r', encoding="UTF-8") as csvfile:
                 reader = csv.reader(csvfile)
                 rows = [row for row in reader]
             data_infos += rows
@@ -98,7 +103,7 @@ def load_images(dataroot, h, w, phase='train', disease='', cphase='', debug=Fals
         # record case
         for idx in fold_index:
             record_path = 'TrainVal-F{}_{}_{}_Case.csv'.format(idx, disease, cphase)
-            with open(os.path.join(dataroot, 'log', record_path), 'r', encoding="UTF-8") as csvfile:
+            with open(os.path.join(dataroot, log_name, record_path), 'r', encoding="UTF-8") as csvfile:
                 reader = csv.reader(csvfile)
                 rows = [row[0] for row in reader]
             case_infos += rows
@@ -110,7 +115,7 @@ def load_images(dataroot, h, w, phase='train', disease='', cphase='', debug=Fals
         # record slice
         for idx in fold_index:
             record_path = 'TrainVal-F{}_{}_{}_Slice.csv'.format(idx, disease, cphase)
-            with open(os.path.join(dataroot, 'log', record_path), 'r', encoding="UTF-8") as csvfile:
+            with open(os.path.join(dataroot, log_name, record_path), 'r', encoding="UTF-8") as csvfile:
                 reader = csv.reader(csvfile)
                 rows = [row for row in reader]
             data_infos += rows
@@ -119,7 +124,7 @@ def load_images(dataroot, h, w, phase='train', disease='', cphase='', debug=Fals
         # record case
         for idx in fold_index:
             record_path = 'TrainVal-F{}_{}_{}_Case.csv'.format(idx, disease, cphase)
-            with open(os.path.join(dataroot, 'log', record_path), 'r', encoding="UTF-8") as csvfile:
+            with open(os.path.join(dataroot, log_name, record_path), 'r', encoding="UTF-8") as csvfile:
                 reader = csv.reader(csvfile)
                 rows = [row[0] for row in reader]
             case_infos += rows
@@ -128,7 +133,7 @@ def load_images(dataroot, h, w, phase='train', disease='', cphase='', debug=Fals
     elif phase == 'test':
         # record slice
         record_path = 'Test_{}_{}_Slice.csv'.format(disease, cphase)
-        with open(os.path.join(dataroot, 'log', record_path), 'r', encoding="UTF-8") as csvfile:
+        with open(os.path.join(dataroot, log_name, record_path), 'r', encoding="UTF-8") as csvfile:
             reader = csv.reader(csvfile)
             rows = [row for row in reader]
         data_infos += rows
@@ -136,7 +141,7 @@ def load_images(dataroot, h, w, phase='train', disease='', cphase='', debug=Fals
 
         # record case
         record_path = 'Test_{}_{}_Case.csv'.format(disease, cphase)
-        with open(os.path.join(dataroot, 'log', record_path), 'r', encoding="UTF-8") as csvfile:
+        with open(os.path.join(dataroot, log_name, record_path), 'r', encoding="UTF-8") as csvfile:
             reader = csv.reader(csvfile)
             rows = [row[0] for row in reader]
         case_infos += rows
