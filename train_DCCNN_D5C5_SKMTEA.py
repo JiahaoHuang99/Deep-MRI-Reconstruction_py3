@@ -1,29 +1,23 @@
 #!/usr/bin/env python
 
-import os
 import time
-
-import cv2
-import numpy as np
 
 import theano
 import theano.tensor as T
 
 import lasagne
 import argparse
-import matplotlib.pyplot as plt
 
 from os.path import join
-from scipy.io import loadmat
 
 from utils import compressed_sensing as cs
 from utils.metric import complex_psnr
 
-from cascadenet.network.model import build_d2_c2, build_d5_c5
+from cascadenet.network.model import build_d5_c5
 from cascadenet.util.helpers import from_lasagne_format
 from cascadenet.util.helpers import to_lasagne_format
 
-from data_loader_complex import *
+from dataloader.data_loader_SKMTEA import *
 from mask_loader import *
 
 from tqdm import tqdm
@@ -119,15 +113,15 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_name', type=str,)
-    parser.add_argument('--data_path_train', type=str, default="/media/ssd/data_temp/fastMRI/knee/d.1.0.complex/train/PD/h5_image_complex",)
-    parser.add_argument('--data_path_val', type=str, default="/media/ssd/data_temp/fastMRI/knee/d.1.0.complex/val/PD/h5_image_complex",)
-    parser.add_argument('--data_path_test', type=str, default="/media/ssd/data_temp/fastMRI/knee/d.1.0.complex/test/PD/h5_image_complex",)
-    parser.add_argument('--num_epoch', type=int, default=10, help='number of epochs')
-    parser.add_argument('--batch_size', type=int, default=10, help='batch size')
+    parser.add_argument('--data_path_train', type=str, default="/media/ssd/data_temp/SKM-TEA/d.0.2/train/h5_image_complex",)
+    parser.add_argument('--data_path_val', type=str, default="/media/ssd/data_temp/SKM-TEA/d.0.2/val/h5_image_complex",)
+    parser.add_argument('--data_path_test', type=str, default="/media/ssd/data_temp/SKM-TEA/d.0.2/test/h5_image_complex",)
+    parser.add_argument('--num_epoch', type=int, default=21, help='number of epochs')
+    parser.add_argument('--batch_size', type=int, default=6, help='batch size')
     parser.add_argument('--lr', type=float, default=0.001, help='initial learning rate')
     parser.add_argument('--l2', type=float, default=1e-6, help='l2 regularisation')
-    parser.add_argument('--undersampling_mask', type=str, default="fMRI_Ran_AF4_CF0.08_PE320", help='Undersampling mask for k-space sampling')
-    parser.add_argument('--resolution', type=int, default=320, help='Undersampling mask for k-space sampling')
+    parser.add_argument('--undersampling_mask', type=str, default="fMRI_Ran_AF4_CF0.08_PE512", help='Undersampling mask for k-space sampling')
+    parser.add_argument('--resolution', type=int, default=512, help='Undersampling mask for k-space sampling')
     parser.add_argument('--debug', action='store_true', help='debug mode')
     parser.add_argument('--savefig', action='store_true', help='Save output images and masks')
 
@@ -140,6 +134,7 @@ if __name__ == '__main__':
     num_epoch = args.num_epoch
     batch_size = args.batch_size
     Nx, Ny = args.resolution, args.resolution
+    image_size = args.resolution
     save_fig = args.savefig
     save_every = 1
     model_name = 'DCCNN_D5C5_SKMTEA_{}'.format(args.undersampling_mask)
@@ -187,8 +182,15 @@ if __name__ == '__main__':
         train_batches = 0
 
         # Load mask
-        mask = load_mask(undersampling_mask)
-        mask = np.repeat(mask[:, np.newaxis], mask.shape[0], axis=1).transpose((1, 0))
+        # mask = load_mask(undersampling_mask)
+        # mask = np.repeat(mask[:, np.newaxis], mask.shape[0], axis=1).transpose((1, 0))
+        if 'fMRI' in undersampling_mask:
+            mask_1d = load_mask(undersampling_mask)
+            mask_1d = mask_1d[:, np.newaxis]
+            mask = np.repeat(mask_1d, image_size, axis=1).transpose((1, 0))[:, :]  # (320, 320)
+        else:
+            mask = load_mask(undersampling_mask)
+
         mask = scipy.fftpack.ifftshift(mask)
         mask_bs = mask[np.newaxis, :, :]
         mask_complex = np.repeat(mask_bs, batch_size, axis=0).astype(float)

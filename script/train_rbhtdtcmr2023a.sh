@@ -1,5 +1,9 @@
 # Setting
+# Train on AYL
 GPUID=1
+
+project_path="/home/jh/Deep-MRI-Reconstruction_py3"
+cd ${project_path}
 
 model_name="D5C5"
 dataset_name="RBHTDTCMR2023A"

@@ -9,3 +9,15 @@ deep_mri
 *.#*
 *.DS_Store
 .idea
+mask/radial/radial_res256_add.npz
+mask/radial/radial_res256_sub.npz
+mask/radial/radial_res320_add.npz
+mask/radial/radial_res320_sub.npz
+mask/radial/radial_res512_add.npz
+mask/radial/radial_res512_sub.npz
+mask/spiral/spiral_res256_add.npz
+mask/spiral/spiral_res256_sub.npz
+mask/spiral/spiral_res320_add.npz
+mask/spiral/spiral_res320_sub.npz
+mask/spiral/spiral_res512_add.npz
+mask/spiral/spiral_res512_sub.npz

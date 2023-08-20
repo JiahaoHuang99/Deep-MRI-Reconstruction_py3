@@ -57,7 +57,7 @@ def create_dummy_data():
     overfitting.
 
     """
-    data = loadmat(join(project_root, './data/cardiac.mat'))['seq']
+    data = loadmat(join(project_root, '../data/cardiac.mat'))['seq']
     nx, ny, nt = data.shape
     ny_red = 8
     sl = ny//ny_red

@@ -57,7 +57,7 @@ def create_dummy_data():
 
     Source: http://mridata.org/
     """
-    data = loadmat(join(project_root, './data/lustig_knee_p2.mat'))['xn']
+    data = loadmat(join(project_root, '../data/lustig_knee_p2.mat'))['xn']
     nx, ny, nz, nc = data.shape
 
     train = np.transpose(data, (3, 0, 1, 2)).reshape((-1, ny, nz))

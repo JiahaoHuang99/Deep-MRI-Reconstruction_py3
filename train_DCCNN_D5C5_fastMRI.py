@@ -1,29 +1,23 @@
 #!/usr/bin/env python
 
-import os
 import time
-
-import cv2
-import numpy as np
 
 import theano
 import theano.tensor as T
 
 import lasagne
 import argparse
-import matplotlib.pyplot as plt
 
 from os.path import join
-from scipy.io import loadmat
 
 from utils import compressed_sensing as cs
 from utils.metric import complex_psnr
 
-from cascadenet.network.model import build_d2_c2, build_d5_c5
+from cascadenet.network.model import build_d5_c5
 from cascadenet.util.helpers import from_lasagne_format
 from cascadenet.util.helpers import to_lasagne_format
 
-from data_loader_complex import *
+from dataloader.data_loader_fastMRI import *
 from mask_loader import *
 
 from tqdm import tqdm
@@ -47,33 +41,25 @@ def prep_input(im, mask):
     return im_und_l, k_und_l, mask_l, im_gnd_l
 
 
-def iterate_minibatch(data, batch_size, shuffle=True):
+def iterate_minibatch(data, batch_size, shuffle=True, drop_last=True):
     n = len(data)
 
     if shuffle:
         data = np.random.permutation(data)
 
+    if drop_last:
+        n = n - n % batch_size
+
     for i in range(0, n, batch_size):
         yield data[i:i+batch_size]
 
 
-def iterate_minibatch_test(data, data_info, batch_size=1, shuffle=False):
-
-    n = len(data)
-    assert len(data) == len(data_info)
-
-    assert batch_size == 1
-    assert shuffle == False
-
-    for i in range(0, n, batch_size):
-        yield data[i:i+batch_size], data_info[i:i+batch_size]
-
 
 def create_dummy_data(data_path_train, data_path_val, data_path_test, h, w):
 
-    train_data_array, train_data_info = load_images(data_path_train, h, w)
-    val_data_array, val_data_info = load_images(data_path_val, h, w)
-    test_data_array, test_data_info = load_images(data_path_test, h, w)
+    train_data_array, train_data_info = load_images(data_path_train, h, w, debug=False)
+    val_data_array, val_data_info = load_images(data_path_val, h, w, debug=False)
+    test_data_array, test_data_info = load_images(data_path_test, h, w, debug=False)
 
     return train_data_array, val_data_array, test_data_array, train_data_info, val_data_info, test_data_info
 
@@ -130,7 +116,6 @@ if __name__ == '__main__':
     parser.add_argument('--data_path_train', type=str, default="/media/ssd/data_temp/fastMRI/knee/d.1.0.complex/train/PD/h5_image_complex",)
     parser.add_argument('--data_path_val', type=str, default="/media/ssd/data_temp/fastMRI/knee/d.1.0.complex/val/PD/h5_image_complex",)
     parser.add_argument('--data_path_test', type=str, default="/media/ssd/data_temp/fastMRI/knee/d.1.0.complex/test/PD/h5_image_complex",)
-    parser.add_argument('--weight_path', type=str, default="/media/NAS01/jiahao/DCCNN/FastMRI", )
     parser.add_argument('--num_epoch', type=int, default=10, help='number of epochs')
     parser.add_argument('--batch_size', type=int, default=10, help='batch size')
     parser.add_argument('--lr', type=float, default=0.001, help='initial learning rate')
@@ -149,17 +134,17 @@ if __name__ == '__main__':
     num_epoch = args.num_epoch
     batch_size = args.batch_size
     Nx, Ny = args.resolution, args.resolution
+    image_size = args.resolution
     save_fig = args.savefig
     save_every = 1
-    model_name = 'DCCNN_D5C5_SKMTEA_{}'.format(args.undersampling_mask)
+    model_name = 'DCCNN_D5C5_FastMRI_{}'.format(args.undersampling_mask)
     data_path_train = args.data_path_train
     data_path_val = args.data_path_val
     data_path_test = args.data_path_test
 
     # Configure directory info
     project_root = '/home/jh/Deep-MRI-Reconstruction_py3'
-    save_dir = join(project_root, 'results/%s' % model_name)
-    weight_path = os.path.join(args.weight_path, model_name)
+    save_dir = join(project_root, 'models/%s' % model_name)
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
 
@@ -167,10 +152,12 @@ if __name__ == '__main__':
     input_shape = (batch_size, 2, Nx, Ny)
     net_config, net,  = build_d5_c5(input_shape)
 
-    # D5-C5 with pre-trained parameters
-    with np.load(os.path.join(weight_path, f'{model_name}_epoch_50.npz')) as f:
-        param_values = [f['arr_{0}'.format(i)] for i in range(len(f.files))]
-        lasagne.layers.set_all_param_values(net, param_values)
+    # Load D5-C5 with pretrained params
+    epoch_updated = 0
+
+    # with np.load(pretrain_path) as f:
+    #     param_values = [f['arr_{0}'.format(i)] for i in range(len(f.files))]
+    #     lasagne.layers.set_all_param_values(net, param_values)
 
     # Compile function
     train_fn, val_fn = compile_fn(net, net_config, args)
@@ -183,58 +170,93 @@ if __name__ == '__main__':
                                                                                Ny)
 
     print('Start Training...')
+    for epoch in range(num_epoch):
 
-    # Testing
-    print('Testing')
-    vis = []
-    i = 0
-
-    # Load mask
-    mask = load_mask(undersampling_mask)
-    mask = np.repeat(mask[:, np.newaxis], mask.shape[0], axis=1).transpose((1, 0))
-    mask = scipy.fftpack.ifftshift(mask)
-    mask_bs = mask[np.newaxis, :, :]
-    mask_complex = np.repeat(mask_bs, batch_size, axis=0).astype(float)
-
-    for im, im_info in tqdm(iterate_minibatch_test(test, test_info, 1, shuffle=False)):
+        epoch = epoch + epoch_updated
 
         t_start = time.time()
 
-        slice_info = im_info[0]
-        im_und, k_und, mask, im_gnd = prep_input(im, mask_complex)
+        # Training
+        print('Training')
+        train_err = 0
+        train_batches = 0
 
-        err, pred = val_fn(im_und, mask, k_und, im_gnd)
+        # Load mask
+        # mask = load_mask(undersampling_mask)
+        # mask = np.repeat(mask[:, np.newaxis], mask.shape[0], axis=1).transpose((1, 0))
+        if 'fMRI' in undersampling_mask:
+            mask_1d = load_mask(undersampling_mask)
+            mask_1d = mask_1d[:, np.newaxis]
+            mask = np.repeat(mask_1d, image_size, axis=1).transpose((1, 0))[:, :]  # (320, 320)
+        else:
+            mask = load_mask(undersampling_mask)
 
-        for im_i, und_i, pred_i in zip(im, from_lasagne_format(im_und), from_lasagne_format(pred)):
+        mask = scipy.fftpack.ifftshift(mask)
+        mask_bs = mask[np.newaxis, :, :]
+        mask_complex = np.repeat(mask_bs, batch_size, axis=0).astype(float)
 
-            img_gt_cplx = im[0]
-            img_recon_cplx = from_lasagne_format(pred)[0]
-            img_zf_cplx = from_lasagne_format(im_und)[0]
+        for im in tqdm(iterate_minibatch(train, batch_size, shuffle=True, drop_last=True)):
 
-            # mkdir(os.path.join(save_dir, 'test_epoch_50', 'h5'))
-            # with h5py.File(os.path.join(save_dir, 'test_epoch_50', 'h5', '{}.h5'.format(slice_info)), "w") as file:
-            #     file.create_group("gt")
-            #     file['gt_cplx'] = img_gt_cplx
-            #     file.create_group("recon")
-            #     file['recon_cplx'] = img_recon_cplx
-            #     file.create_group("zf")
-            #     file['zf_cplx'] = img_zf_cplx
-            #     file.attrs['img_info'] = '{}'.format(slice_info)
-            #
-            # gt = abs(img_gt_cplx)
-            # recon = abs(img_recon_cplx)
-            # zf = abs(img_zf_cplx)
-            #
-            # mkdir(os.path.join(save_dir, 'test_epoch_50', 'png', 'GT'))
-            # cv2.imwrite(os.path.join(save_dir, 'test_epoch_50', 'png', 'GT', 'GT_{:04d}.png'.format(i)), gt*255)
-            # mkdir(os.path.join(save_dir, 'test_epoch_50', 'png', 'Recon'))
-            # cv2.imwrite(os.path.join(save_dir, 'test_epoch_50', 'png', 'Recon', 'Recon_{:04d}.png'.format(i)), recon*255)
-            # mkdir(os.path.join(save_dir, 'test_epoch_50', 'png', 'ZF'))
-            # cv2.imwrite(os.path.join(save_dir, 'test_epoch_50', 'png', 'ZF', 'ZF_{:04d}.png'.format(i)), zf*255)
+            im_und, k_und, mask, im_gnd = prep_input(im, mask_complex)  # (BS, 2, 128, 128) # mask (BS, 2, 128, 128)
+            err = train_fn(im_und, mask, k_und, im_gnd)[0]
+            train_err += err
+            train_batches += 1
 
-        i = i + 1
+        train_err /= train_batches
         t_end = time.time()
-        print('Testing Idx: {}; Time Cost: {}'.format(i, (t_end-t_start)))
 
+        # Testing
+        print('Testing')
+        vis = []
+        test_err = 0
+        base_psnr = 0
+        test_psnr = 0
+        test_batches = 0
+        i = 0
 
+        # Load mask
+        mask_complex = np.repeat(mask_bs, 1, axis=0).astype(float)
+        if (epoch + 1) % 1 == 0:
+            for im in tqdm(iterate_minibatch(test, 1, shuffle=False, drop_last=False)):
+                im_und, k_und, mask, im_gnd = prep_input(im, mask_complex)
+
+                err, pred = val_fn(im_und, mask, k_und, im_gnd)
+
+                test_err += err
+                for im_i, und_i, pred_i in zip(im, from_lasagne_format(im_und), from_lasagne_format(pred)):
+                    base_psnr += complex_psnr(im_i, und_i, peak='max')
+                    test_psnr += complex_psnr(im_i, pred_i, peak='max')
+
+                    gt = abs(im)[0]
+                    recon = abs(from_lasagne_format(pred))[0]
+                    zf = abs(from_lasagne_format(im_und))[0]
+
+                    if save_fig and i < 10:
+                        mkdir(os.path.join(save_dir, 'epoch_{}'.format(epoch + 1), 'png', 'GT'))
+                        cv2.imwrite(os.path.join(save_dir, 'epoch_{}'.format(epoch + 1), 'png', 'GT', 'GT_{:04d}.png'.format(i)), gt*255)
+                        mkdir(os.path.join(save_dir, 'epoch_{}'.format(epoch + 1), 'png', 'Recon'))
+                        cv2.imwrite(os.path.join(save_dir, 'epoch_{}'.format(epoch + 1), 'png', 'Recon', 'Recon_{:04d}.png'.format(i)), recon*255)
+                        mkdir(os.path.join(save_dir, 'epoch_{}'.format(epoch + 1), 'png', 'ZF'))
+                        cv2.imwrite(os.path.join(save_dir, 'epoch_{}'.format(epoch + 1), 'png', 'ZF', 'ZF_{:04d}.png'.format(i)), zf*255)
+
+                    test_batches += 1
+                    i = i + 1
+
+            test_err /= test_batches
+            base_psnr /= (test_batches * batch_size)
+            test_psnr /= (test_batches * batch_size)
+
+        print("Epoch {}/{}".format(epoch + 1, num_epoch))
+        print(" time: {}s".format(t_end - t_start))
+        print(" training loss:\t\t{:.6f}".format(train_err))
+        if (epoch + 1) % 20 == 0:
+            print(" test loss:\t\t{:.6f}".format(test_err))
+            print(" base PSNR:\t\t{:.6f}".format(base_psnr))
+            print(" test PSNR:\t\t{:.6f}".format(test_psnr))
+
+        # save the model
+        if (epoch + 1) % 5 == 0:
+            name = '%s_epoch_%d.npz' % (model_name, epoch + 1)
+            np.savez(join(save_dir, name), *lasagne.layers.get_all_param_values(net))
+            print('model parameters saved at %s' % join(os.getcwd(), name))
 

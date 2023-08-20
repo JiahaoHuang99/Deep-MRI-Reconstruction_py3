@@ -1,29 +1,22 @@
 #!/usr/bin/env python
 
-import os
 import time
-
-import cv2
-import numpy as np
 
 import theano
 import theano.tensor as T
 
 import lasagne
 import argparse
-import matplotlib.pyplot as plt
 
 from os.path import join
-from scipy.io import loadmat
 
 from utils import compressed_sensing as cs
 from utils.metric import complex_psnr
 
-from cascadenet.network.model import build_d2_c2, build_d5_c5
+from cascadenet.network.model import build_d5_c5
 from cascadenet.util.helpers import from_lasagne_format
 from cascadenet.util.helpers import to_lasagne_format
 
-from data_loader_CC import *
 from mask_loader import *
 
 from tqdm import tqdm
