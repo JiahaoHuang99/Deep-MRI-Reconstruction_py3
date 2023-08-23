@@ -1,5 +1,5 @@
 # Setting
-GPUID=3
+GPUID=0
 
 model_name="D5C5"
 dataset_name="SKMTEA"
@@ -10,6 +10,8 @@ mask_name="fMRI_Ran_AF4_CF0.08_PE512"
 #mask_name="fMRI_Reg_AF4_CF0.08_PE512"
 #mask_name="fMRI_Reg_AF8_CF0.04_PE512"
 #mask_name="fMRI_Reg_AF16_CF0.02_PE512"
+mask_name="radial_add_10_res320"
+#mask_name="spiral_add_10_res320"
 
 task_name=${model_name}_${dataset_name}_${mask_name}
 log_name=log_test_${task_name}

@@ -1,5 +1,5 @@
 # Setting
-GPUID=2
+GPUID=0
 
 model_name="D5C5"
 dataset_name="FastMRI"

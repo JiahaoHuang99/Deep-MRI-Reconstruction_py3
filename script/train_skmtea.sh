@@ -1,6 +1,6 @@
 # Setting
 # Train on AYL
-GPUID=1
+GPUID=0
 
 project_path="/home/jh/Deep-MRI-Reconstruction_py3"
 cd ${project_path}
@@ -13,7 +13,9 @@ dataset_name="SKMTEA"
 #mask_name="fMRI_Ran_AF16_CF0.02_PE512"
 #mask_name="fMRI_Reg_AF4_CF0.08_PE512"
 #mask_name="fMRI_Reg_AF8_CF0.04_PE512"
-mask_name="fMRI_Reg_AF16_CF0.02_PE512"
+#mask_name="fMRI_Reg_AF16_CF0.02_PE512"
+mask_name="radial_add_10_res512"
+#mask_name="spiral_add_10_res512"
 
 task_name=${model_name}_${dataset_name}_${mask_name}
 log_name=log_train_${task_name}
