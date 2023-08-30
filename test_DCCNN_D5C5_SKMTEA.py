@@ -142,6 +142,7 @@ if __name__ == '__main__':
     num_epoch = args.num_epoch
     batch_size = args.batch_size
     Nx, Ny = args.resolution, args.resolution
+    image_size = args.resolution
     save_fig = args.savefig
     save_every = 1
     model_name = 'DCCNN_D5C5_SKMTEA_{}'.format(args.undersampling_mask)
@@ -161,7 +162,7 @@ if __name__ == '__main__':
     net_config, net,  = build_d5_c5(input_shape)
 
     # D5-C5 with pre-trained parameters
-    with np.load(os.path.join(weight_path, f'{model_name}_epoch_50.npz')) as f:
+    with np.load(os.path.join(weight_path, f'{model_name}_epoch_20.npz')) as f:
         param_values = [f['arr_{0}'.format(i)] for i in range(len(f.files))]
         lasagne.layers.set_all_param_values(net, param_values)
 
@@ -188,7 +189,7 @@ if __name__ == '__main__':
     if 'fMRI' in undersampling_mask:
         mask_1d = load_mask(undersampling_mask)
         mask_1d = mask_1d[:, np.newaxis]
-        mask = np.repeat(mask_1d, args.image_size, axis=1).transpose((1, 0))[:, :]  # (320, 320)
+        mask = np.repeat(mask_1d, image_size, axis=1).transpose((1, 0))[:, :]  # (320, 320)
     else:
         mask = load_mask(undersampling_mask)
 

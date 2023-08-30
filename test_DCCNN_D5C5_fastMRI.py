@@ -142,6 +142,7 @@ if __name__ == '__main__':
     num_epoch = args.num_epoch
     batch_size = args.batch_size
     Nx, Ny = args.resolution, args.resolution
+    image_size = args.resolution
     save_fig = args.savefig
     save_every = 1
     model_name = 'DCCNN_D5C5_FastMRI_{}'.format(args.undersampling_mask)
@@ -188,7 +189,7 @@ if __name__ == '__main__':
     if 'fMRI' in undersampling_mask:
         mask_1d = load_mask(undersampling_mask)
         mask_1d = mask_1d[:, np.newaxis]
-        mask = np.repeat(mask_1d, args.image_size, axis=1).transpose((1, 0))[:, :]  # (320, 320)
+        mask = np.repeat(mask_1d, image_size, axis=1).transpose((1, 0))[:, :]  # (320, 320)
     else:
         mask = load_mask(undersampling_mask)
 
