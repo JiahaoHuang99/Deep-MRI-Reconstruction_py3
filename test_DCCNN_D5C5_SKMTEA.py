@@ -162,7 +162,7 @@ if __name__ == '__main__':
     net_config, net,  = build_d5_c5(input_shape)
 
     # D5-C5 with pre-trained parameters
-    with np.load(os.path.join(weight_path, f'{model_name}_epoch_20.npz')) as f:
+    with np.load(os.path.join(weight_path, f'{model_name}_epoch_10.npz')) as f:
         param_values = [f['arr_{0}'.format(i)] for i in range(len(f.files))]
         lasagne.layers.set_all_param_values(net, param_values)
 
