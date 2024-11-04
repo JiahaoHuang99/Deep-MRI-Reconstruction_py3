@@ -69,9 +69,9 @@ def iterate_minibatch_test(data, data_info, batch_size=1, shuffle=False, drop_la
         yield data[i:i+batch_size], data_info[i:i+batch_size]
 
 
-def create_dummy_data(data_path, h, w, phase='train', disease='', cphase='', debug=False):
+def create_dummy_data(data_path, log_folder_path, h, w, phase='train', disease='', cphase='', debug=False):
 
-    data, data_info = load_images(data_path, h, w, phase, disease, cphase, debug=debug)
+    data, data_info = load_images(data_path, log_folder_path, h, w, phase, disease, cphase, debug=debug)
 
     return data, data_info
 
@@ -125,9 +125,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_name', type=str,)
-    parser.add_argument('--data_path', type=str, default="/media/ssd/data_temp/RBHT/DT_CMR_data/RBHT_DTCMR_2023A/d.1.0/",)
+    parser.add_argument('--data_path', type=str, default="/media/NAS_CMR/DTCMR/Newpipeline/Data_pickle4/Data/",)
+    parser.add_argument('--log_folder_path', type=str, default="/media/NAS06/jiahao/RBHT_DTCMR_2024A/d.3.0.debug/log", )
     parser.add_argument('--disease', type=str, default='AllDisease', help='AllDisease or HEALTHY')
-    parser.add_argument('--cphase', type=str, default='diastole', help='diastole or systole')
+    # parser.add_argument('--cphase', type=str, default='diastole', help='diastole or systole')
     parser.add_argument('--weight_path', type=str, default="x", )
     parser.add_argument('--num_epoch', type=int, default=10, help='number of epochs')
     parser.add_argument('--batch_size', type=int, default=10, help='batch size')
@@ -153,9 +154,10 @@ if __name__ == '__main__':
     data_path = args.data_path
     log_folder_path = args.log_folder_path
     disease = args.disease
-    cphase = args.cphase
+    cphase = ["systole", "diastole"]
+    debug = args.debug
 
-    model_name = 'DCCNN_D5C5_RBHTDTCMR2023A_{}_{}_{}'.format(undersampling_mask, disease, cphase)
+    model_name = 'DCCNN_D5C5_RBHTDTCMR2024A_{}_{}_{}'.format(undersampling_mask, disease, 'all')
     model_name_for_weight = model_name
 
     # Configure directory info

@@ -140,7 +140,7 @@ if __name__ == '__main__':
     disease = args.disease
     cphase = args.cphase
     debug = args.debug
-    model_name = 'DCCNN_D5C5_RBHTDTCMR2023A_{}_{}_{}'.format(undersampling_mask, disease, 'all')
+    model_name = 'DCCNN_D5C5_RBHTDTCMR2024A_{}_{}_{}'.format(undersampling_mask, disease, 'all')
 
     # Configure directory info
     project_root = '/home/jh/Deep-MRI-Reconstruction_py3'
