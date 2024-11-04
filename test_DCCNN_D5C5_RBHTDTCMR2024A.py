@@ -223,7 +223,7 @@ if __name__ == '__main__':
             zf = zf[80:176, :].astype(np.float32)
 
             mkdir(os.path.join(save_dir, 'h5'))
-            with h5py.File(os.path.join(save_dir, 'h5', '{}_{}.h5'.format(case_name, slice_name)), "w") as file:
+            with h5py.File(os.path.join(save_dir, 'h5', '{}_{:03d}.h5'.format(case_name, int(slice_name))), "w") as file:
 
                 file['gt'] = gt
                 file['recon'] = recon
